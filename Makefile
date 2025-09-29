@@ -26,3 +26,8 @@ clean: ## Limpia los directorios de salida.
 	@echo "Limpiando directorios de salida..."
 	@rm -rf $(OUT_DIR) $(DIST_DIR)
 	@echo "Limpieza completada."
+
+run:  ## Ejecuta el script analizador.sh
+	@echo "Ejecutando el analizador"
+	@bash src/analizador.sh
+	@echo "Ejecución completada."
