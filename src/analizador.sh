@@ -77,7 +77,7 @@ evaluar() {
             regla2="FALLO"
         fi
 
-        echo "\"$url\",\"$regla1\",\"$regla2\"" >> "$MATRIX_FILE"
+        echo "$url,$regla1,$regla2" >> "$MATRIX_FILE"
     done
 
     echo "Evaluación completada: Resultados guardados en $MATRIX_FILE."
