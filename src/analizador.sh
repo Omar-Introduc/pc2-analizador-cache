@@ -41,6 +41,8 @@ recolectar() {
         ETAG=${ETAG:-N/A}
         EXPIRES=${EXPIRES:-N/A}
 
+        CACHE_CONTROL=$(echo "$CACHE_CONTROL" | sed 's/,/;/g')
+
         echo "\"${target}\",\"${CACHE_CONTROL}\",\"${ETAG}\",\"${EXPIRES}\"" >> "$OUT_HEADERS"
     done < "$TARGETS_FILE"
 

@@ -2,3 +2,7 @@ https://www.google.com
 https://www.bing.com
 https://probando_link_que_no_exite.com
 https://www.example.com
+https://github.com
+https://fonts.googleapis.com/css?family=Roboto
+https://www.cloudflare.com
+https://soundcloud.com/
