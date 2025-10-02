@@ -54,3 +54,75 @@ Utiliza URLs que contengan las cabeceras correctas (Cache-Control con max-age o 
 
 "https://www.example.com","OK","OK"
 ```
+## Proceso de implementación de pruebas
+
+Para implementar las primeras dos pruebas, se usaron dos targets, `https://www.example.com` y `https://www.google.com`, los cuales cumplen completamente las reglas y no cumplen al menos una, respectivamente. Usando `awk` se extrae de la matriz las respuestas de ambas reglas juntas, y con comparaciones se determina si se cumplieron todas las reglas o no.  
+Para la tercera prueba, se tuvo que reestructurar ciertas funciones de `src/analizador.sh` para hacer la simulación de respuesta `304 Not Modified`.
+
+| Tarea | Lógica Implementada | Código Relevante |
+| :--- | :--- | :--- |
+| **Implementación de get_headers()** | Se implementó una funcion en `src/analizador.sh` la cual dependiendo de los argumentos que se le de den, agarra headers de forma diferente (esto para simular respuesta `304 Not Modified`) | `if [[ "$option" == "0" ]]; then res=$(curl -I "$1" 2> /dev/null) echo "$res" else res=$(curl -I -H "If-None-Match: \"$etag\"" "$url" 2> /dev/null) echo "$res" fi` |
+| **Simulación de respuesta `304 Not Modified`** | Se implementó una funcion en `src/analizador.sh` la cual simula una respuesta `304 Not Modified` haciendo uso de una etag de ejemplo y un target de ejemplo | `echo "\"URL\",\"Cache-Control\",\"ETag\",\"Expires\"" > "$OUT_HEADERS" echo "Simulacion de revalidación con target $url_ejemplo y etag $etag_ejemplo" analizar_target "$url_ejemplo" "1" "$etag_ejemplo"` |
+
+--------------------------------------------------------------------------------------------
+
+| Archivo | Cambio Realizado | Justificación |
+| :--- | :--- | :--- |
+| `src/analizador.sh` | **Cambio de modo de obtención de headers:** en lugar del uso de `curl`, se usa la función `get_headers` | Esto se va a usar para la simulación |
+| `src/analizador.sh` | **Refactorización de modo de análisis de targets:** la lógica de análisis de targets se separa en una funcion separada | Esto se va a usar para la simulación | 
+
+## Salida de error esperadas
+
+### Test 1
+```sh
+✗ Matriz: Matriz reporta OK para una URL de prueba conforme
+   (in test file tests/rules.bats, line 32)
+     `false' failed
+   make[1]: se entra en el directorio '/home/exsos/Escritorio/General/Desarrollo-pc2/pc2-analizador-cache'
+   Ejecutando el analizador
+   Iniciando script analizador.sh
+   Iniciando análisis de targets desde docs/targets.txt
+   Analizando: https://www.example.com
+   Análisis completado: Resultados guardados en out/headers.csv.
+   El archivo headers.csv se generó correctamente en 'out/'.
+   Iniciando evaluación de reglas
+   Evaluación completada: Resultados guardados en out/matriz_cumplimiento.csv.
+   Fin de la ejecución.
+   Ejecutando limpieza
+   Ejecución completada.
+   make[1]: se sale del directorio '/home/exsos/Escritorio/General/Desarrollo-pc2/pc2-analizador-cache'
+   Error: Matriz reporto fallo de alguna de las reglas (OKOK)
+```
+
+### Test 2
+```sh
+✗ Matriz: Matriz reporta FALLO para una URL de prueba no conforme
+   (in test file tests/rules.bats, line 60)
+     `false' failed
+   make[1]: se entra en el directorio '/home/exsos/Escritorio/General/Desarrollo-pc2/pc2-analizador-cache'
+   Ejecutando el analizador
+   Iniciando script analizador.sh
+   Iniciando análisis de targets desde docs/targets.txt
+   Analizando: https://www.google.com
+   Análisis completado: Resultados guardados en out/headers.csv.
+   El archivo headers.csv se generó correctamente en 'out/'.
+   Iniciando evaluación de reglas
+   Evaluación completada: Resultados guardados en out/matriz_cumplimiento.csv.
+   Fin de la ejecución.
+   Ejecutando limpieza
+   Ejecución completada.
+   make[1]: se sale del directorio '/home/exsos/Escritorio/General/Desarrollo-pc2/pc2-analizador-cache'
+   Error: Matriz no reporto fallo de alguna de las reglas (FALLOFALLO)
+```
+
+### Test 3
+```sh
+✗ Script: Interpreta correctamente respuesta 304 Not Modified del servidor
+   (in test file tests/rules.bats, line 100)
+     `false' failed
+   Error: Script fallo al interpretar respuesta 304 Not Modified
+```
+
+## Porque estas pruebas son importantes?
+
+Estas pruebas son importantes para validar el correcto funcionamiento del script, especificamente, que la matriz detecta correctamente el cumplimiento o no cumplimiento de las regla y que este interprete correctamente respuestas no esperadas del servidor
