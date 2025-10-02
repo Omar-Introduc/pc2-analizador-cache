@@ -24,12 +24,23 @@ recolectar() {
         echo "\"URL\",\"Cache-Control\",\"ETag\",\"Expires\"" > "$OUT_HEADERS"
 
     while IFS= read -r target || [ -n "$target" ]; do
-        echo "Analizando: $target"
-        HEADERS=$(curl -I "$target" 2> /dev/null)
+        analizar_target "$target"
+    done < "$TARGETS_FILE"
 
+    echo "Análisis completado: Resultados guardados en $OUT_HEADERS."
+}
+
+analizar_target() {
+	option=${2:-0}
+	etag=${3:-0}
+	echo "Analizando: $1"
+        HEADERS=$(get_headers "$1" "$2" "$3" 2> /dev/null)
+        
+	#echo "$HEADERS"
+	
         if ! echo "$HEADERS" | grep -q "^HTTP/"; then
-            echo "No se pudo acceder a: $target, se omite."
-            echo "\"${target}\",\"N/A\",\"N/A\",\"N/A\"" >> "$OUT_HEADERS"
+            echo "No se pudo acceder a: $1, se omite."
+            echo "\"${1}\",\"N/A\",\"N/A\",\"N/A\"" >> "$OUT_HEADERS"
             continue
         fi
 
@@ -43,10 +54,34 @@ recolectar() {
 
         CACHE_CONTROL=$(echo "$CACHE_CONTROL" | sed 's/,/;/g')
 
-        echo "\"${target}\",\"${CACHE_CONTROL}\",\"${ETAG}\",\"${EXPIRES}\"" >> "$OUT_HEADERS"
-    done < "$TARGETS_FILE"
+        echo "\"${1}\",\"${CACHE_CONTROL}\",\"${ETAG}\",\"${EXPIRES}\"" >> "$OUT_HEADERS"
+}
 
-    echo "Análisis completado: Resultados guardados en $OUT_HEADERS."
+sim_revalidacion_target() {
+	#etag_ejemplo="166f0-63fa44419ec80"
+	#url_ejemplo="https://www.wikipedia.org/"
+	
+	url_ejemplo="$1"
+	etag_ejemplo="$2"
+        echo "\"URL\",\"Cache-Control\",\"ETag\",\"Expires\"" > "$OUT_HEADERS"
+	echo "Simulacion de revalidación con target $url_ejemplo y etag $etag_ejemplo"
+	analizar_target "$url_ejemplo" "1" "$etag_ejemplo"
+	echo "Simulacion completada: Resultados guardados en $OUT_HEADERS."
+}
+
+get_headers() {
+	url=$1
+	option=${2:-0}
+	etag=${3:-0}
+	#echo "$option"
+	
+	if [[ "$option" == "0" ]]; then
+        	res=$(curl -I "$1" 2> /dev/null)
+        	echo "$res"
+    	else 
+    		res=$(curl -I -H "If-None-Match: \"$etag\"" "$url" 2> /dev/null)
+        	echo "$res"
+    	fi
 }
 
 evaluar() {
