@@ -8,8 +8,11 @@ TARGETS_FILE="$DOCS_FILE/targets.txt"
 MATRIX_FILE="$OUT_DIR/matriz_cumplimiento.csv"
 
 cleanup() {
-    echo "Ejecutando limpieza"
+    echo "Ejecutando limpieza de archivos temporales..."
     rm -f "$TEMP" 2>/dev/null
+    if [ -z "$ANALIZADOR_NO_CLEANUP" ]; then
+        rm -rf "$OUT_DIR" 2>/dev/null
+    fi
 }
 
 trap cleanup EXIT INT TERM
