@@ -21,6 +21,7 @@ tools: ## Verifica que las herramientas requeridas estén instaladas.
 test: ## Ejecuta la suite de pruebas con Bats.
 	@echo "Ejecutando pruebas..."
 	@bats tests/
+	@ANALIZADOR_NO_CLEANUP=true bats tests/
 
 clean: ## Limpia los directorios de salida.
 	@echo "Limpiando directorios de salida..."

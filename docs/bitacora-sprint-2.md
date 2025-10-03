@@ -126,3 +126,24 @@ Para la tercera prueba, se tuvo que reestructurar ciertas funciones de `src/anal
 ## Porque estas pruebas son importantes?
 
 Estas pruebas son importantes para validar el correcto funcionamiento del script, especificamente, que la matriz detecta correctamente el cumplimiento o no cumplimiento de las regla y que este interprete correctamente respuestas no esperadas del servidor
+
+---
+
+## Nuevas funcionalidades y asegurar que el script cumple con las prácticas de Bash robusto.
+**Resumen de Actividades:**
+ El trabajo se centró en mejorar la robustez del script principal y en enriquecer la documentación del proyecto para aumentar su claridad y mantenibilidad.
+
+**Detalles de Implementación:**
+
+1.  **Mejora del Script (`analizador.sh`):**
+    - Se implementó un manejador de señales (`trap`) para garantizar que todos los archivos temporales y el directorio de salida (`out/`) se eliminen de forma segura al finalizar la ejecución del script, incluso si este se interrumpe. Esto evita la acumulación de artefactos y asegura un estado limpio para cada ejecución.
+
+2.  **Actualización de Documentación:**
+    - **`docs/README.md`**: Se expandió el documento para definir formalmente el concepto de "cumplimiento" de caché, detallando las dos reglas de validación implementadas (directivas de frescura como `max-age` y la presencia de validadores como `ETag`).
+    - **`docs/contrato-salidas.md`**: Se actualizó el contrato de salidas para incluir la estructura y el propósito del nuevo archivo `matriz_cumplimiento.csv`, asegurando que cualquier consumidor del script entienda cómo interpretar los resultados.
+
+3.  **Corrección de la Suite de Pruebas:**
+    - La nueva funcionalidad de limpieza automática rompió las pruebas existentes, ya que estas necesitaban acceder a los archivos de salida. 
+    - Se solucionó haciendo que la limpieza fuera condicional mediante una variable de entorno (`ANALIZADOR_NO_CLEANUP`).
+    - Se ajustó el `Makefile` para usar dicha variable durante el target `test`, permitiendo que las pruebas pasaran sin desactivar la nueva funcionalidad en el entorno de producción.
+
