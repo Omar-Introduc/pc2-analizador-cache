@@ -1,10 +1,11 @@
 #!/bin/bash
+set -euo pipefail
 
-OUT_DIR="out"
+OUT_DIR="${OUT_DIR:-out}"
 OUT_HEADERS="$OUT_DIR/headers.csv"
 TEMP=$(mktemp) 
 DOCS_FILE="docs"
-TARGETS_FILE="$DOCS_FILE/targets.txt"
+TARGETS_FILE="${TARGETS_FILE:-docs/targets.txt}"
 MATRIX_FILE="$OUT_DIR/matriz_cumplimiento.csv"
 
 # Reglas configurables por variable de entorno
@@ -31,7 +32,7 @@ recolectar() {
         echo "\"URL\",\"Cache-Control\",\"ETag\",\"Expires\"" > "$OUT_HEADERS"
 
     while IFS= read -r target || [ -n "$target" ]; do
-        analizar_target "$target"
+        analizar_target "$target" || true
     done < "$TARGETS_FILE"
 
     echo "Análisis completado: Resultados guardados en $OUT_HEADERS."
@@ -41,7 +42,7 @@ analizar_target() {
 	option=${2:-0}
 	etag=${3:-0}
 	echo "Analizando: $1"
-        HEADERS=$(get_headers "$1" "$2" "$3" 2> /dev/null)
+        HEADERS=$(get_headers "$1" "$option" "$etag" 2> /dev/null)
         
 	#echo "$HEADERS"
 	
@@ -108,8 +109,9 @@ evaluar() {
         etag=$(echo "$etag" | sed 's/^"\(.*\)"$/\1/')
         
         # Regla 1: max-age y s-maxage configurables
-        max_age=$(echo "$cache_control" | grep -o 'max-age=[0-9]*' | cut -d= -f2)
-        s_maxage=$(echo "$cache_control" | grep -o 's-maxage=[0-9]*' | cut -d= -f2)
+        max_age=$(echo "$cache_control" | grep -o 'max-age=[0-9]*' | cut -d= -f2 || true)
+        s_maxage=$(echo "$cache_control" | grep -o 's-maxage=[0-9]*' | cut -d= -f2 || true)
+
 
         if { [[ -n "$max_age" && "$max_age" -ge "$MIN_MAX_AGE" ]]; } || { [[ -n "$s_maxage" && "$s_maxage" -ge "$MIN_S_MAXAGE" ]]; }; then
             regla1="OK"

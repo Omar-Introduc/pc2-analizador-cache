@@ -1,18 +1,21 @@
 #!/usr/bin/env bats
 
-OUT_DIR="out"
-OUT_HEADERS="$OUT_DIR/headers.csv"
-OUT_MATRIZ="$OUT_DIR/matriz_cumplimiento.csv"
-DOCS_DIR="docs"
-DOCS_TARGETS="$DOCS_DIR/targets.txt"
+load 'test_helper'
+
+OUT_DIR_TESTS="$TMP_DIR_TESTS/out"
+DOCS_DIR_TESTS="$TMP_DIR_TESTS/docs"
+TARGETS_FILE_TESTS="$TMP_DIR_TESTS/docs/targets.txt"
+MATRIZ_FILE_TESTS="$OUT_DIR_TESTS/matriz_cumplimiento.csv"
+OUT_HEADERS_TESTS="$OUT_DIR_TESTS/headers.csv"
+
 URL_TEST_OK="https://www.example.com"
 URL_TEST_FALLO="https://www.google.com"
 
 @test "Matriz: Matriz reporta OK para una URL de prueba conforme" {
     #echo "$OUT_HEADERS" >&3
     #echo "$DOCS_TARGETS" >&3
-    
-    if [ ! -d "$DOCS_DIR" ]; then
+        
+    if [ ! -d "$$DOCS_DIR_TESTS" ]; then
         echo "no existe directorio $DOCS_DIR" >&2
         false
     fi
@@ -21,11 +24,11 @@ URL_TEST_FALLO="https://www.google.com"
     #https://www.example.com
     #https://www.google.com
     
-    echo "$URL_TEST_OK" > "$DOCS_TARGETS"
-    make run
+    echo "$URL_TEST_OK" > "$TARGETS_FILE_TESTS"
+    TARGETS_FILE="$TARGETS_FILE_TESTS" OUT_DIR="$OUT_DIR_TESTS" make run
     
     #cat "$OUT_MATRIZ" | awk -v regex="$URL_TEST_OK" -F "," '$0 ~ regex {print $2 $3}' >&3
-    REPORTE="$(cat "$OUT_MATRIZ" | awk -F "," 'NR==2 {print $2 $3}')"
+    REPORTE="$(cat "$MATRIZ_FILE_TESTS" | awk -F "," 'NR==2 {print $2 $3}')"
     
     if [[ ! "$REPORTE" == "OKOK" ]]; then
         echo "Error: Matriz reporto fallo de alguna de las reglas ($REPORTE)" >&2
@@ -39,7 +42,7 @@ URL_TEST_FALLO="https://www.google.com"
     #echo "$OUT_HEADERS" >&3
     #echo "$DOCS_TARGETS" >&3
     
-    if [ ! -d "$DOCS_DIR" ]; then
+    if [ ! -d "$DOCS_DIR_TESTS" ]; then
         echo "no existe directorio $DOCS_DIR" >&2
         false
     fi
@@ -49,11 +52,11 @@ URL_TEST_FALLO="https://www.google.com"
     #https://www.google.com
     
     
-    echo "$URL_TEST_FALLO" > "$DOCS_TARGETS"
-    make run
+    echo "$URL_TEST_FALLO" > "$TARGETS_FILE_TESTS"
+    TARGETS_FILE="$TARGETS_FILE_TESTS" OUT_DIR="$OUT_DIR_TESTS" make run
     
     #cat "$OUT_MATRIZ" | awk -v regex="$URL_TEST_OK" -F "," '$0 ~ regex {print $2 $3}' >&3
-    REPORTE="$(cat "$OUT_MATRIZ" | awk -F "," 'NR==2 {print $2 $3}')"
+    REPORTE="$(cat "$MATRIZ_FILE_TESTS" | awk -F "," 'NR==2 {print $2 $3}')"
     
     if [[ "$REPORTE" == "OKOK" ]]; then
         echo "Error: Matriz no reporto fallo de alguna de las reglas ($REPORTE)" >&2
@@ -75,9 +78,7 @@ URL_TEST_FALLO="https://www.google.com"
     cache_control_ejemplo="s-maxage=86400; must-revalidate; max-age=3600"
     etag_ejemplo="166f0-63fa44419ec80"
     
-    mkdir -p "$OUT_DIR"
     run bash -c '
-        export ANALIZADOR_NO_CLEANUP=true
     	url_ejemplo="https://www.wikipedia.org/"
     	etag_ejemplo="166f0-63fa44419ec80"
     	source ./src/analizador.sh
