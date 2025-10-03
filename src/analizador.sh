@@ -7,6 +7,10 @@ DOCS_FILE="docs"
 TARGETS_FILE="$DOCS_FILE/targets.txt"
 MATRIX_FILE="$OUT_DIR/matriz_cumplimiento.csv"
 
+# Reglas configurables por variable de entorno
+MIN_MAX_AGE="${MIN_MAX_AGE:-0}" 
+MIN_S_MAXAGE="${MIN_S_MAXAGE:-0}"
+
 cleanup() {
     echo "Ejecutando limpieza de archivos temporales..."
     rm -f "$TEMP" 2>/dev/null
@@ -20,7 +24,7 @@ trap cleanup EXIT INT TERM
 recolectar() {
     if [ ! -f "$TARGETS_FILE" ]; then
         echo "Error: El archivo de targets '$TARGETS_FILE' no se encontró." >&2
-        exit 1
+        exit 5 # Código de salida 5: Archivo de targets no encontrado
     fi
 
     echo "Iniciando análisis de targets desde $TARGETS_FILE"
@@ -44,7 +48,7 @@ analizar_target() {
         if ! echo "$HEADERS" | grep -q "^HTTP/"; then
             echo "No se pudo acceder a: $1, se omite."
             echo "\"${1}\",\"N/A\",\"N/A\",\"N/A\"" >> "$OUT_HEADERS"
-            continue
+            return 2 # Código de salida 2: error de red
         fi
 
         CACHE_CONTROL=$(echo "$HEADERS" | awk -F': ' '/^[Cc]ache-[Cc]ontrol:/ {print $2; exit}' | tr -d '\r' | cut -d ';' -f1)
@@ -90,7 +94,7 @@ get_headers() {
 evaluar() {
     if [ ! -f $OUT_HEADERS ]; then
         echo "Error: El archivo de entrada '$OUT_HEADERS' no se generó correctamente." >&2
-        return 1
+        return 6 # Código de salida 6: Archivo de entrada no encontrado
     fi
 
     echo "El archivo headers.csv se generó correctamente en 'out/'."
@@ -102,8 +106,12 @@ evaluar() {
         url=$(echo "$url" | sed 's/^"\(.*\)"$/\1/')
         cache_control=$(echo "$cache_control" | sed 's/^"\(.*\)"$/\1/')
         etag=$(echo "$etag" | sed 's/^"\(.*\)"$/\1/')
+        
+        # Regla 1: max-age y s-maxage configurables
+        max_age=$(echo "$cache_control" | grep -o 'max-age=[0-9]*' | cut -d= -f2)
+        s_maxage=$(echo "$cache_control" | grep -o 's-maxage=[0-9]*' | cut -d= -f2)
 
-        if [[ "$cache_control" == *max-age* || "$cache_control" == *s-maxage* ]]; then
+        if { [[ -n "$max_age" && "$max_age" -ge "$MIN_MAX_AGE" ]]; } || { [[ -n "$s_maxage" && "$s_maxage" -ge "$MIN_S_MAXAGE" ]]; }; then
             regla1="OK"
         else
             regla1="FALLO"
@@ -125,11 +133,15 @@ evaluar() {
 
 main(){
 
-    echo "Iniciando script analizador.sh"
+    echo "==========================================="
+    echo "      Iniciando script analizador.sh"
+    echo "==========================================="
     mkdir -p "$OUT_DIR"
     recolectar
     evaluar
-    echo "Fin de la ejecución."
+    echo "==========================================="
+    echo "      Fin de la ejecución."
+    echo "==========================================="
 
 
 }
