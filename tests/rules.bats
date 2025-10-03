@@ -75,7 +75,9 @@ URL_TEST_FALLO="https://www.google.com"
     cache_control_ejemplo="s-maxage=86400; must-revalidate; max-age=3600"
     etag_ejemplo="166f0-63fa44419ec80"
     
+    mkdir -p "$OUT_DIR"
     run bash -c '
+        export ANALIZADOR_NO_CLEANUP=true
     	url_ejemplo="https://www.wikipedia.org/"
     	etag_ejemplo="166f0-63fa44419ec80"
     	source ./src/analizador.sh
