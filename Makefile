@@ -1,14 +1,13 @@
 SHELL := /bin/bash
 PROJECT_NAME := analizador-cache
-OUT_DIR := out
+RELEASE ?= v0.1.0
+
+# Usa ?= sobrescribe estas variables
+OUT_DIR ?= out
+TARGETS_FILE ?= docs/targets.txt
 DIST_DIR := dist
-RELEASE ?=v0.1.0
 
-#Archivo de código fuente y de entrada
 ANALIZADOR_SCRIPT := src/analizador.sh
-TARGET_INPUT := docs/targets.txt
-
-#Archivo de salida generados
 CACHE_FILE := $(OUT_DIR)/.cache
 
 .PHONY: help tools test clean run pack
@@ -19,9 +18,9 @@ help: ## Muestra esta ayuda.
 run: $(CACHE_FILE)## Ejecuta el script analizador.sh
 	@echo "Ejecución completada. Generado en $(OUT_DIR)/"
 
-$(CACHE_FILE): $(ANALIZADOR_SCRIPT) $(TARGET_INPUT)
+$(CACHE_FILE): $(ANALIZADOR_SCRIPT) $(TARGETS_FILE)
 	@echo "Ejecutando el analizador..."
-	@ANALIZADOR_NO_CLEANUP=true bash $(ANALIZADOR_SCRIPT)
+	@OUT_DIR=$(OUT_DIR) TARGETS_FILE=$(TARGETS_FILE) ANALIZADOR_NO_CLEANUP=true bash $(ANALIZADOR_SCRIPT)
 	@touch $@
 
 pack: ## Empaqueta el proyecto en un archivo tar.gz
@@ -43,7 +42,6 @@ tools: ## Verifica que las herramientas requeridas estén instaladas.
 test: ## Ejecuta la suite de pruebas con Bats.
 	@echo "Ejecutando pruebas..."
 	@bats tests/
-	@ANALIZADOR_NO_CLEANUP=true bats tests/
 
 clean: ## Limpia los directorios de salida.
 	@echo "Limpiando directorios de salida..."

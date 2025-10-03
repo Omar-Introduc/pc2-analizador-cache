@@ -2,11 +2,13 @@
 set -euo pipefail
 
 OUT_DIR="${OUT_DIR:-out}"
+TARGETS_FILE="${TARGETS_FILE:-docs/targets.txt}"
+
 OUT_HEADERS="$OUT_DIR/headers.csv"
+MATRIX_FILE="$OUT_DIR/matriz_cumplimiento.csv"
+
 TEMP=$(mktemp) 
 DOCS_FILE="docs"
-TARGETS_FILE="${TARGETS_FILE:-docs/targets.txt}"
-MATRIX_FILE="$OUT_DIR/matriz_cumplimiento.csv"
 
 # Reglas configurables por variable de entorno
 MIN_MAX_AGE="${MIN_MAX_AGE:-0}" 
@@ -147,4 +149,6 @@ main(){
 
 
 }
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
