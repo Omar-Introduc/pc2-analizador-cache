@@ -33,3 +33,9 @@ El objetivo era optimizar el target `run` para que el script `analizador.sh` sol
   - **Síntoma**: Incluso después de corregir el error tipográfico, el comando `touch` seguía fallando. El script `analizador.sh` se ejecutaba, pero el directorio `out/` desaparecía antes de que se pudiera crear el archivo `.cache`.
   - **Causa Raíz**: El script `analizador.sh` contiene una función `cleanup` que se activa con `trap` y elimina el directorio `out/` al finalizar la ejecución. Este comportamiento se puede desactivar con una variable de entorno.
   - **Solución**: Se añadió la variable de entorno `ANALIZADOR_NO_CLEANUP=true` a la llamada del script en el `Makefile`. Esto evita la limpieza automática del directorio `out/` y permite que el archivo `.cache` se cree correctamente, completando la implementación de la caché.
+
+### Actualización del README.md, contrato-salidas.md y `make help`
+
+- La tabla de variable de entorno del documento `README.md` fue actualizada para incluir las dos variables añadidas para la configuración de Regla 1 (`MIN_MAX_AGE` y  `MIN_S_MAXAGE`).
+- `contrato-salidas.md` fue actualizado para especificar el formato de salida de la matriz en `matriz_cumplimiento.csv`, tambien se especifico la salida de las cabeceras en `headers.csv`
+- Se actualizaron los comentarios en el `Makefile` que incluyen descripciones de los targets. Estos son impresos en terminal via un `grep` en `make help`, junto a su respectivo target.

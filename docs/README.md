@@ -2,7 +2,9 @@
 Documentación de variables:
 | Variable | Descripción                                                            | Ejemplo                                                |
 |:--------:|------------------------------------------------------------------------|--------------------------------------------------------|
-|$TARGETS  |Incluye las URLs las cuales se quieren consultar, separadas por espacios| TARGETS="www.google.com www.example.com www.github.com"|
+|TARGETS  |Incluye las URLs las cuales se quieren consultar, separadas por saltos de linea en `docs/targets.txt`| `TARGETS="www.google.com\nwww.example.com\nwww.github.com"`|
+|MIN_MAX_AGE  | Establece un mínimo valor de `max-age` de la cabecera `Cache-Control` para el cumplimiento de la Regla 1 (Por defecto en 0). | `MIN_MAX_AGE=100`|
+|MIN_S_MAXAGE  | Establece un mínimo valor de `s-maxage` de la cabecera `Cache-Control` para el cumplimiento de la Regla 1 (Por defecto en 0). | `MIN_S_MAXAGE=9600`|
 
 ## Reglas de Cumplimiento de Cache
 
