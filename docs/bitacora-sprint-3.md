@@ -1,3 +1,34 @@
+### Implementación del Script `analizador.sh`
+
+#### Objetivo General:
+El objetivo de esta tarea fue modificar y mejorar el script `analizador.sh` para permitir que las reglas sean configurables mediante variables de entorno, implementar códigos de salida claros para diferentes errores y asegurar que todos los mensajes de progreso y error sean fáciles de entender para un operador.
+
+---
+
+#### 1. Modificación de `analizador.sh` para hacer las reglas configurables
+**Tarea realizada**:  
+Se modificó el script para permitir la configuración dinámica de las reglas `max-age` y `s-maxage` mediante variables de entorno (`MIN_MAX_AGE` y `MIN_S_MAXAGE`). Esto permite que el comportamiento de las reglas cambie sin tener que modificar el código del script directamente.
+
+**¿Cómo se usa?**:  
+Para establecer los valores de `max-age` y `s-maxage` antes de ejecutar el script, se puede definir las variables de entorno en la terminal, como se muestra a continuación:
+```bash
+export MIN_MAX_AGE=3600  # Establecer valor mínimo para max-age
+export MIN_S_MAXAGE=600  # Establecer valor mínimo para s-maxage
+```
+Luego, ejecutas el script con:
+```bash
+./src/analizador.sh
+```
+#### 2. Implementación de códigos de salida claros para diferentes tipos de error
+**Tarea realizada**:  
+Se implementaron códigos de salida para diferentes tipos de error:
+- **exit 2**: Si hay un error de red al intentar acceder a una URL.
+- **exit 5**: Si el archivo `TARGETS_FILE` no se encuentra.
+- **exit 6**: Si el archivo de salida `headers.csv` no se genera correctamente.
+
+**¿Cómo se usa?**:  
+Cuando el script se ejecuta, si ocurre un error de red o el archivo `TARGETS` no está presente, el script termina con el código de salida correspondiente. El operador puede usar el código de salida para diagnosticar el tipo de error que ocurrió y tomar acción.
+
 ### Implementación del Target `pack`
 
 #### Especificación
